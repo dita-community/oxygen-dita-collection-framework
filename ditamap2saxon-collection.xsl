@@ -5,6 +5,22 @@
   xmlns:relpath="http://dita2indesign/functions/relpath"
   exclude-result-prefixes="xs df relpath"
   version="2.0">
+  <!-- =============================================================
+       Construct a Saxon collection from a DITA map.
+       
+       The collection reflects all referenced maps and normal-role
+       topics (by default).
+       
+       Set parameter "includeResourceOnly" to "true" to also include
+       resource-only topics.
+       
+       Author: W. Eliot Kimber, George Bina
+       
+       Copyright (c) 2016 DITA Community Project
+       
+       May be used without restriction.
+       
+       ============================================================== -->
   
   <xsl:import href="lib/dita-support-lib.xsl"/>
   <xsl:import href="lib/relpath_util.xsl"/>
@@ -17,14 +33,35 @@
     select="matches($debug, '1|yes|on|true', 'i')"
   />
   
+  <!-- When true, include resource-only topics in addition
+       to normal-role topics.
+       
+       Default is "false".
+    -->
+  <xsl:param name="includeResourceOnly" select="'false'"/>
+  <xsl:variable name="isIncludeResourceOnly" as="xs:boolean"
+    select="matches($includeResourceOnly, '1|yes|true|on', 'i')"
+  />
+  
   <xsl:key name="elementByMatchKey" match="*[@df:matchKey]" use="@df:matchKey"/>
   
   <xsl:template name="standalone">
     <xsl:param name="doDebug" as="xs:boolean" select="$debugBoolean"/>
     
+    <xsl:variable name="inputURI" as="xs:string" 
+      select="'urn:ditamap2saxon-collection.xsl!/file:/Users/ekimber/workspace/veracode/temp/wek-fixed-integration-guide/dita/Integration_Guide.ditamap'"/>
+
+    <xsl:variable name="base" select="substring-after($inputURI, '!/')"/>  
+    
+    <xsl:message> + [DEBUG] standalone: base="<xsl:value-of select="$base"/>"</xsl:message>
+    
+    <xsl:variable name="inputDoc" as="document-node()?" 
+      select="document($base)"
+    />
+    
     <xsl:variable name="resolvedMap" as="document-node()">
       <xsl:document>
-        <xsl:apply-templates select="." mode="resolve-map">
+        <xsl:apply-templates select="$inputDoc" mode="resolve-map">
           <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>        
           <xsl:with-param name="map-base-uri" as="xs:string" tunnel="yes" select="base-uri(.)"/>
           <xsl:with-param name="parentHeadLevel" as="xs:integer" tunnel="yes" select="0"/>
@@ -53,22 +90,28 @@
   
   <xsl:template match="/">
     <xsl:param name="doDebug" as="xs:boolean" select="$debugBoolean"/>
-
+    
     <xsl:variable name="base" select="substring-after(document-uri(.), '!/')"/>    
-
+    <xsl:variable name="inputDoc" as="document-node()?" 
+      select="document($base)"
+    />
+    
     <xsl:variable name="resolvedMap" as="document-node()">
       <xsl:document>
-        <xsl:apply-templates select="." mode="resolve-map">
+        <xsl:apply-templates select="$inputDoc" mode="resolve-map">
           <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>        
-          <xsl:with-param name="map-base-uri" as="xs:string" tunnel="yes" select="base-uri(.)"/>
+          <xsl:with-param name="map-base-uri" as="xs:string" tunnel="yes" select="$base"/>
           <xsl:with-param name="parentHeadLevel" as="xs:integer" tunnel="yes" select="0"/>
         </xsl:apply-templates>
       </xsl:document>
     </xsl:variable>
     
     <collection stable="true">
-      <xsl:apply-templates mode="collect" select="document($base)"/>
-   </collection>
+      <xsl:apply-templates mode="collect" select="$inputDoc">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+        <xsl:with-param name="resolvedMap" as="document-node()" tunnel="yes" select="$resolvedMap"/>
+      </xsl:apply-templates>
+    </collection>
   </xsl:template>
   
   <xsl:template match="/" mode="collect">
@@ -83,8 +126,6 @@
     mode="collect">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="resolvedMap" as="document-node()" tunnel="yes"/>
-    
-    <xsl:variable name="doDebug" as="xs:boolean" select="@keyref != ''"/>
     
     <xsl:variable name="matchKey" as="xs:string" select="generate-id(.)"/>
     
@@ -133,11 +174,13 @@
       
     </xsl:template>
     
-    <!-- Do not try to open resourse-only topics -->
+    <!-- Do not try to open resourse-only topics unless includeResourceOnly has been set to true -->
     <xsl:template match="*[contains(@class, ' map/topicref ') and @processing-role='resource-only']" priority="200" 
       mode="collect">
       <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-      
+      <xsl:if test="$isIncludeResourceOnly">
+        <xsl:next-match/>
+      </xsl:if>
     </xsl:template>
   
   <xsl:template match="text()" mode="#all">
