@@ -64,3 +64,12 @@ By default the XSLT transform only includes normal-role topics, but you can tell
 
 If you look a the framework contents you can see that it's not that complicated. It wouldn't be hard to extend this code to work with other types of XML formats or to use different business logic in constructing the Saxon collection.
 
+## More XQueries
+
+The DITA Community dita-utilities project includes some XQuery scripts that use the DITA collections framework:
+
+* Key usage report: https://github.com/dita-community/dita-utilities/tree/master/src/xquery/key-usage-report
+
+You can cut and paste the XQuery code into the Oxygen XPath/XQuery Builder. It produces a report of all the keys used for keyrefs (not conkeyrefs) and other details to help with debugging key-related issues.
+
+
