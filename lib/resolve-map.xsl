@@ -67,7 +67,7 @@
   
   <xsl:template mode="resolve-map" match="@*">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    <xsl:if test="$doDebug">
+    <xsl:if test="false() and $doDebug">
       <xsl:message> + [DEBUG]   Default attribute handling: <xsl:sequence select="name(..)"/>/@<xsl:sequence select="name(.)"/>="<xsl:sequence select="string(.)"/>"</xsl:message>
     </xsl:if>
     <xsl:copy/>
@@ -75,7 +75,9 @@
   
   <xsl:template mode="resolve-map" match="*" priority="-1">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] resolve-map: Fallback handling <xsl:value-of select="concat(name(..), '/', name(.))"/>...</xsl:message>
+    </xsl:if>
     <xsl:copy>
       <xsl:apply-templates select="node() | @*" mode="#current"/>
     </xsl:copy>
@@ -166,7 +168,14 @@
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="parentHeadLevel" as="xs:integer" tunnel="yes"/>
     
-    <xsl:variable name="refTarget" select="df:resolveTopicRef(.)" as="element()?"/>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] resolve-map(): ** Processing topic ref "<xsl:sequence select="name(.)"/>"</xsl:message>
+      <xsl:message> + [DEBUG] resolve-map():      keys="<xsl:value-of select="@keys"/>"</xsl:message>
+      <xsl:message> + [DEBUG] resolve-map():      keyref="<xsl:value-of select="@keyref"/>"</xsl:message>
+      <xsl:message> + [DEBUG] resolve-map():      href="<xsl:value-of select="@href"/>"</xsl:message>
+      <xsl:message> + [DEBUG] resolve-map():    Calling resolveTopicRef()...</xsl:message>
+    </xsl:if>
+    <xsl:variable name="refTarget" select="df:resolveTopicRef(., $doDebug)" as="element()?"/>
     <!-- FIXME: This is kind of weak. Need a way to involve referenced topic in determination
                  of head level. This approach assumes that any non-resource-only topicref
                  contributes to the hierarchy.
@@ -178,7 +187,6 @@
                  sidebars.
       -->
     <xsl:if test="$doDebug">
-      <xsl:message> + [DEBUG] resolve-map(): ** Processing topic ref "<xsl:sequence select="name(.)"/>"</xsl:message>
       <xsl:choose>      
        <xsl:when test="$refTarget">
          <xsl:message> + [DEBUG] resolve-map():  refTarget type="<xsl:sequence select="name($refTarget[1])"/>"</xsl:message>
@@ -188,10 +196,10 @@
        </xsl:otherwise>
      </xsl:choose>
     </xsl:if>
+    <xsl:if test="not($refTarget)">
+      <xsl:message> + [WARN] Failed to resolve topicref to a resource: <xsl:sequence select="df:reportTopicref(.)"/></xsl:message>
+    </xsl:if>
       <xsl:choose>
-        <xsl:when test="not($refTarget)">
-          <xsl:message> + [WARN] Failed to resolve topicref to a resource: <xsl:sequence select="df:reportTopicref(.)"/></xsl:message>
-        </xsl:when>
         <xsl:when test="@format = 'ditamap'">
           <xsl:if test="$doDebug">
             <xsl:message> + [DEBUG] resolve-map(): Reference is to a subordinate map.</xsl:message>
@@ -203,6 +211,7 @@
           <xsl:if test="not(df:class($refTarget, 'map/map'))">
             <xsl:message> + [WARNING] resolve-map(): Topicref with format='ditamap' did not resolve to a map, got <xsl:sequence select="name($refTarget)"/> (class=<xsl:sequence select="$refTarget/@class"/>)</xsl:message>
             <xsl:copy>
+              <xsl:attribute name="df:matchKey" select="generate-id(.)"/>
               <xsl:apply-templates select="@* | node()"/>           
             </xsl:copy>
           </xsl:if>

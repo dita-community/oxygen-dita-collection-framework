@@ -17,14 +17,19 @@
     select="matches($debug, '1|yes|on|true', 'i')"
   />
   
+  <xsl:key name="elementByMatchKey" match="*[@df:matchKey]" use="@df:matchKey"/>
+  
   <xsl:template name="standalone">
     <xsl:param name="doDebug" as="xs:boolean" select="$debugBoolean"/>
-    <xsl:variable name="resolvedMap" as="element()?">
-      <xsl:apply-templates select="." mode="resolve-map">
-        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>        
-        <xsl:with-param name="map-base-uri" as="xs:string" tunnel="yes" select="base-uri(.)"/>
-        <xsl:with-param name="parentHeadLevel" as="xs:integer" tunnel="yes" select="0"/>
-      </xsl:apply-templates>
+    
+    <xsl:variable name="resolvedMap" as="document-node()">
+      <xsl:document>
+        <xsl:apply-templates select="." mode="resolve-map">
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>        
+          <xsl:with-param name="map-base-uri" as="xs:string" tunnel="yes" select="base-uri(.)"/>
+          <xsl:with-param name="parentHeadLevel" as="xs:integer" tunnel="yes" select="0"/>
+        </xsl:apply-templates>
+      </xsl:document>
     </xsl:variable>
 
 <!--    <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>-->
@@ -40,14 +45,27 @@
     <collection stable="true">
       <xsl:apply-templates mode="collect" select="root(.)">
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-        <xsl:with-param name="resolvedMap" as="element()?" tunnel="yes" select="$resolvedMap"/>
+        <xsl:with-param name="resolvedMap" as="document-node()" tunnel="yes" select="$resolvedMap"/>
       </xsl:apply-templates>
     </collection>
     
   </xsl:template>
   
   <xsl:template match="/">
+    <xsl:param name="doDebug" as="xs:boolean" select="$debugBoolean"/>
+
     <xsl:variable name="base" select="substring-after(document-uri(.), '!/')"/>    
+
+    <xsl:variable name="resolvedMap" as="document-node()">
+      <xsl:document>
+        <xsl:apply-templates select="." mode="resolve-map">
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>        
+          <xsl:with-param name="map-base-uri" as="xs:string" tunnel="yes" select="base-uri(.)"/>
+          <xsl:with-param name="parentHeadLevel" as="xs:integer" tunnel="yes" select="0"/>
+        </xsl:apply-templates>
+      </xsl:document>
+    </xsl:variable>
+    
     <collection stable="true">
       <xsl:apply-templates mode="collect" select="document($base)"/>
    </collection>
@@ -64,11 +82,25 @@
   <xsl:template match="*[contains(@class, ' map/topicref ') and (@href|@keyref) and (@format='dita' or not(@format))]" 
     mode="collect">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="resolvedMap" as="document-node()" tunnel="yes"/>
+    
+    <xsl:variable name="doDebug" as="xs:boolean" select="@keyref != ''"/>
+    
+    <xsl:variable name="matchKey" as="xs:string" select="generate-id(.)"/>
+    
     <xsl:if test="$doDebug">
-      <xsl:message> + [DEBUG] collect: Resolving topicref (@keyref="<xsl:value-of select="@keyref"/>", href="<xsl:value-of select="@href"/>")</xsl:message>
+      <xsl:message> + [DEBUG] collect: topicref match key="<xsl:value-of select="$matchKey"/>"</xsl:message>
+    </xsl:if>
+    
+    <xsl:variable name="resolvedMapTopicref" as="element()?"
+      select="key('elementByMatchKey', $matchKey, $resolvedMap)"
+    />
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] collect: Resolving topicref (@keyref="<xsl:value-of select="$resolvedMapTopicref/@keyref"/>", href="<xsl:value-of select="$resolvedMapTopicref/@href"/>")</xsl:message>
     </xsl:if>
 
-    <xsl:variable name="topic" select="df:resolveTopicRef(.)" as="element()?"/>
+    <xsl:variable name="topic" select="df:resolveTopicRef($resolvedMapTopicref, $doDebug)" as="element()?"/>
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] collect: Got topic="<xsl:value-of select="exists($topic)"/></xsl:message>
     </xsl:if>
