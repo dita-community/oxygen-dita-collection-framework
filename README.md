@@ -6,9 +6,23 @@ as the source of an XPath collection() using Saxon through OxygenXML.
 
 ## Installation
 
-Copy the directory "dita-collections" under this project's frameworks/ directory into the Oxygen frameworks/ directory.
+The framework is available as an Oxygen add-on through the Oxygen add-on manager.
 
-Restart Oxygen to make the new framework available.
+To install the add-on initially do the folowing:
+
+1. Go to Preferences->Add-ons
+2. Add a new item with the URL "https://raw.githubusercontent.com/dita-community/oxygen-dita-collection-framework/master/updateSite.xml"
+3. Click "OK" to save the setting.
+4. Go to Help->Install new updates
+5. From the "Show add-ons from" dropdown either choose "ALL AVAILABLE SITES" or choose the oxygen-dita-collection-framework site you just added.
+6. After a bit you should see the Oxygen DITA Collection Framework in the list of available add ons. Select it and click "Next"
+7. Check the box to accept the license agreement and click "Install" to start the installation process.
+8. You should get a pop-up indicating that the add-on is not signed. It is not. Click OK to accept the add-on anyway. The framework does not
+have any compiled files so it's pretty safe.
+9. Restart Oxygen. 
+
+If you select "Enable automatic updates checking" in the Preferences->Add-ons panel, then when the framework is updated you will get
+the update automatically.
 
 ## Usage
 
@@ -50,4 +64,3 @@ By default the XSLT transform only includes normal-role topics, but you can tell
 
 If you look a the framework contents you can see that it's not that complicated. It wouldn't be hard to extend this code to work with other types of XML formats or to use different business logic in constructing the Saxon collection.
 
-## 
