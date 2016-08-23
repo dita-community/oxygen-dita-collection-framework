@@ -30,13 +30,13 @@ With a DITA map open in the main editor (not the Map Manager) construct a collec
 like so in the Oxygen XPath/XQuery Builder view:
 
 ```
- let $docs := collection('ditaTopics:/' || document-uri(.))
- 
- return 
- <result>{
- return for $doc in $docs 
-     return <doc uri="{document-uri($doc)}"/>
-}</result> 
+let $docs := collection('ditaTopics:/' || document-uri(.))
+
+return 
+<result>{
+for $doc in $docs 
+return <doc uri="{document-uri($doc)}"/>
+}</result>  
 ```
 
 ## How It Works
