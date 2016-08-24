@@ -133,8 +133,12 @@
       <xsl:message> + [DEBUG] collect: topicref match key="<xsl:value-of select="$matchKey"/>"</xsl:message>
     </xsl:if>
     
-    <xsl:variable name="resolvedMapTopicref" as="element()?"
-      select="key('elementByMatchKey', $matchKey, $resolvedMap)"
+    <!-- FIXME: Probably a logic bug in how we generate the match keys
+                as there can be duplicates (same map included multiple times?)
+                This is a workaround to just get the first one.
+      -->
+    <xsl:variable name="resolvedMapTopicref" as="element()*"
+      select="key('elementByMatchKey', $matchKey, $resolvedMap)[1]"
     />
     
     <xsl:if test="$doDebug">

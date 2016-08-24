@@ -23,4 +23,24 @@ May be used for any purpose.
 
 ]]></xt:license>
     </xt:extension>
+    <xt:extension
+        id="org.dita-community.dita-collections">
+        <xt:location
+            href="https://github.com/dita-community/oxygen-dita-collection-framework/releases/download/0.1.0/dita-collections-0.1.1.zip"/>
+        <xt:version>0.1.1</xt:version>
+        <xt:oxy_version>18.0+</xt:oxy_version>
+        <xt:type>framework</xt:type>
+        <xt:author>Eliot Kimber</xt:author>
+        <xt:name>Oxygen DITA Collection Framework</xt:name>
+        <xt:description
+            xmlns="http://www.w3.org/1999/xhtml">
+            OxygenXML framework for making Saxon collections from DITA maps to make it easy to operate on the files in a map using XQuery.
+        </xt:description>
+        <xt:license>
+            <![CDATA[
+            
+May be used for any purpose.
+
+]]></xt:license>
+    </xt:extension>
 </xt:extensions>
