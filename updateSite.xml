@@ -26,7 +26,7 @@ May be used for any purpose.
     <xt:extension
         id="org.dita-community.dita-collections">
         <xt:location
-            href="https://github.com/dita-community/oxygen-dita-collection-framework/releases/download/0.1.0/dita-collections-0.1.1.zip"/>
+            href="https://github.com/dita-community/oxygen-dita-collection-framework/releases/download/0.1.1/dita-collections-0.1.1.zip"/>
         <xt:version>0.1.1</xt:version>
         <xt:oxy_version>18.0+</xt:oxy_version>
         <xt:type>framework</xt:type>
