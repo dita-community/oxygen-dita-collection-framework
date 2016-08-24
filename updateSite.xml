@@ -35,6 +35,7 @@ May be used for any purpose.
         <xt:description
             xmlns="http://www.w3.org/1999/xhtml">
             OxygenXML framework for making Saxon collections from DITA maps to make it easy to operate on the files in a map using XQuery.
+            <p>Release 0.1.1 fixes bug that causes XSLT failure under some conditions.</p>
         </xt:description>
         <xt:license>
             <![CDATA[
